@@ -1,4 +1,4 @@
-package com.cyberasero.myblog;
+package com.cyberasero.myblog.profile;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -6,9 +6,6 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
@@ -17,53 +14,48 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.cyberasero.myblog.auth.SignUp;
-import com.cyberasero.myblog.profile.UserProfile;
+import com.cyberasero.myblog.R;
 import com.cyberasero.myblog.volley.VolleySingleton;
-import com.rengwuxian.materialedittext.MaterialEditText;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class UserProfile extends AppCompatActivity {
+    private String NAME,LAST_NAME,ACCOUNT,EMS,RMS,EMAIL,SITE,DEPARTMENT,PHONE,STATUS,DOH;
     private String appURL;
-    private String EMAIL,PASSWORD;
-    EditText mEmail, mPassword;
-    Button mButton;
-    TextView mCreateAccount;
     Activity mContext = this;
-
+    TextView mName,mLastName,mAccount,mEMS,mRMS,mEmail,mSite,mDepartment,mPhone,mStatus,mDOH;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_user_profile);
 
-        appURL = "http://192.168.1.12/api/logIn.php";
-
+        mName = findViewById(R.id.text_Name);
+        mLastName = findViewById(R.id.text_LastName);
+        mAccount = findViewById(R.id.text_Account);
+        mEMS = findViewById(R.id.text_EMS);
+        mRMS = findViewById(R.id.text_RMS);
         mEmail = findViewById(R.id.text_Email);
-        mPassword = findViewById(R.id.text_Password);
-        mButton = findViewById(R.id.btn_SignIn);
-        mCreateAccount = findViewById(R.id.ab_createAccount);
+        mSite = findViewById(R.id.text_Site);
+        mDepartment = findViewById(R.id.text_Department);
+        mPhone = findViewById(R.id.text_Phone);
+        mStatus = findViewById(R.id.text_Status);
+        mDOH = findViewById(R.id.text_DOH);
 
-        mCreateAccount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), SignUp.class);
-                startActivity(intent);
-            }
-        });
+        Intent data = getIntent();
+        EMAIL = data.getStringExtra("email");
+        appURL = "http://192.168.1.12/api/getUserDetails.php?email="+EMAIL;
 
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                logIn();
-            }
-        });
+        getUserDetails();
+
     }
-    private void logIn(){
-        EMAIL = mEmail.getText().toString();
-        PASSWORD = mPassword.getText().toString();
+
+    private void getUserDetails(){
+
         if (EMAIL.isEmpty()){
             AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
             alert.setMessage("Email cannot be empty");
@@ -76,49 +68,38 @@ public class MainActivity extends AppCompatActivity {
             });
             alert.show();
         }
-        else if (PASSWORD.isEmpty()){
-            AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
-            alert.setMessage("Password cannot be empty");
-            alert.setCancelable(false);
-            alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            alert.show();
-        }
-        else if (PASSWORD.length() < 8){
-            AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
-            alert.setMessage("Password must contain at least 8 characters");
-            alert.setCancelable(false);
-            alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            alert.show();
-        }
         else {
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, appURL, new Response.Listener<String>() {
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, appURL, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
-                    if (response.equals("true")) {
-                        Intent intent = new Intent(mContext, UserProfile.class);
-                        intent.putExtra("email",EMAIL);
-                        startActivity(intent);
-                    } else {
-                        AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
-                        alert.setMessage(response);
-                        alert.setCancelable(false);
-                        alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                        alert.show();
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        NAME = jsonObject.getString("name");
+                        LAST_NAME = jsonObject.getString("lname");
+                        ACCOUNT = jsonObject.getString("acct");
+                        EMS = jsonObject.getString("ems");
+                        RMS = jsonObject.getString("rms");
+                        EMAIL = jsonObject.getString("email");
+                        SITE = jsonObject.getString("site");
+                        DEPARTMENT = jsonObject.getString("dept");
+                        PHONE = jsonObject.getString("phone");
+                        STATUS = jsonObject.getString("status");
+                        DOH = jsonObject.getString("doh");
+
+                        mName.setText(NAME);
+                        mLastName.setText(LAST_NAME);
+                        mAccount.setText(ACCOUNT);
+                        mEMS.setText(EMS);
+                        mRMS.setText(RMS);
+                        mEmail.setText(EMAIL);
+                        mSite.setText(SITE);
+                        mDepartment.setText(DEPARTMENT);
+                        mPhone.setText(PHONE);
+                        mStatus.setText(STATUS);
+                        mDOH.setText(DOH);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
             }, new Response.ErrorListener() {
@@ -189,14 +170,6 @@ public class MainActivity extends AppCompatActivity {
                 public Map<String, String> getHeaders() throws AuthFailureError {
                     HashMap<String , String> params = new HashMap<>();
                     params.put("Accept", "Application/json: charset=UTF-8");
-                    return params;
-                }
-
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    HashMap<String , String> params = new HashMap<>();
-                    params.put("email",EMAIL);
-                    params.put("password",PASSWORD);
                     return params;
                 }
             };

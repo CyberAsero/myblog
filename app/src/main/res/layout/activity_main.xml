@@ -41,7 +41,7 @@
         android:layout_marginTop="20dp"
         android:autofillHints="@string/email_address"
         android:background="@drawable/et_bg"
-        android:drawableEnd="@drawable/ic_email_black_24dp"
+        android:drawableEnd="@drawable/ic_email_white_24dp"
         android:hint="@string/email_address"
         android:inputType="textEmailAddress"
         android:padding="16dp"
